@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  spring-boot:
+    build: .
+    restart: on-failure:2
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/db1?createDatabaseIfNotExist=true
+      SPRING_DATA_MONGODB_URI: mongodb://mongo/db2
+    depends_on:
+      - mysql
+      - mongo
+
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db1
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - 3306:3306
+
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_DATABASE: db2
+    volumes:
+      - ./mongo/init.js:/docker-entrypoint-initdb.d/init.js
+    ports:
+      - 27017:27017
+
+
+networks:
+  multiple-db:
+
